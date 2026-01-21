@@ -1,0 +1,629 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+    <meta name="apple-mobile-web-app-capable" content="yes">
+    <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+    <meta name="apple-mobile-web-app-title" content="Golden Snitch">
+    <title>The Golden Snitch Hunt</title>
+    <script crossorigin src="https://cdnjs.cloudflare.com/ajax/libs/react/18.2.0/umd/react.production.min.js"></script>
+    <script crossorigin src="https://cdnjs.cloudflare.com/ajax/libs/react-dom/18.2.0/umd/react-dom.production.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/babel-standalone/7.23.5/babel.min.js"></script>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+        
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif;
+            overflow-x: hidden;
+            -webkit-tap-highlight-color: transparent;
+            touch-action: pan-y;
+        }
+        
+        #root {
+            width: 100%;
+            min-height: 100vh;
+        }
+
+        @keyframes shake {
+            0%, 100% { transform: translateX(0); }
+            25% { transform: translateX(-10px); }
+            75% { transform: translateX(10px); }
+        }
+
+        .animate-shake {
+            animation: shake 0.3s ease-in-out;
+        }
+
+        @keyframes bounce {
+            0%, 100% { transform: translateY(0); }
+            50% { transform: translateY(-20px); }
+        }
+
+        .animate-bounce {
+            animation: bounce 1s ease-in-out infinite;
+        }
+
+        @keyframes pulse {
+            0%, 100% { opacity: 1; }
+            50% { opacity: 0.6; }
+        }
+
+        .animate-pulse {
+            animation: pulse 2s ease-in-out infinite;
+        }
+
+        input:focus {
+            outline: none;
+        }
+
+        button {
+            -webkit-tap-highlight-color: transparent;
+            cursor: pointer;
+        }
+
+        button:active {
+            transform: scale(0.95);
+        }
+    </style>
+</head>
+<body>
+    <div id="root"></div>
+
+    <script type="text/babel">
+        const { useState, useEffect } = React;
+
+        const GoldenSnitchHunt = () => {
+          const [gameState, setGameState] = useState('intro');
+          const [currentLocation, setCurrentLocation] = useState(0);
+          const [foundLocations, setFoundLocations] = useState([]);
+          const [showHint, setShowHint] = useState(false);
+          const [codeInput, setCodeInput] = useState('');
+          const [wrongAttempt, setWrongAttempt] = useState(false);
+
+          const locations = [
+            {
+              id: 1,
+              name: "Professor Snape's Office",
+              code: "E49",
+              clue: "Where Father disappears to during the day.",
+              hint: "Think about where Dad spends his time when he's working... perhaps somewhere private?",
+              foundMessage: "You've found Professor Snape's Office! The dimly lit room smells of strange potions. A cauldron bubbles in the corner...",
+              icon: "🧪"
+            },
+            {
+              id: 2,
+              name: "Gryffindor Common Room",
+              code: "E2D",
+              clue: "Where cushions become other worlds.",
+              hint: "Where do you go to imagine adventures and create stories? Think soft and comfortable...",
+              foundMessage: "Welcome to the Gryffindor Common Room! The fire crackles warmly. You can see the portrait of the Fat Lady on the wall.",
+              icon: "🛋️"
+            },
+            {
+              id: 3,
+              name: "The Great Hall",
+              code: "D1D",
+              clue: "The location of great feasts and banquets.",
+              hint: "Where does everyone gather to eat together? Think of celebrations and special meals...",
+              foundMessage: "The Great Hall! Thousands of candles float above long tables laden with delicious food. The enchanted ceiling shows the sky above.",
+              icon: "🍽️"
+            },
+            {
+              id: 4,
+              name: "The Golden Snitch",
+              code: "150",
+              clue: "The smallest ball with silver wings, worth one hundred and fifty points it brings. Catch it quick, end the game, and seeker's glory be your name!",
+              hint: "The Snitch is fast and hard to catch. Look for something small and golden that moves... (Hint: how many points is the Snitch worth?)",
+              foundMessage: "YOU CAUGHT THE GOLDEN SNITCH! 150 points to your house! The game is won!",
+              icon: "⚡"
+            }
+          ];
+
+          const startGame = () => {
+            setGameState('hunting');
+            setCurrentLocation(0);
+            setFoundLocations([]);
+            setShowHint(false);
+            setCodeInput('');
+            setWrongAttempt(false);
+          };
+
+          const resetGame = () => {
+            setGameState('intro');
+            setCurrentLocation(0);
+            setFoundLocations([]);
+            setShowHint(false);
+            setCodeInput('');
+            setWrongAttempt(false);
+          };
+
+          const handleCodeSubmit = () => {
+            const currentLoc = locations[currentLocation];
+            
+            if (codeInput.toUpperCase() === currentLoc.code.toUpperCase()) {
+              setFoundLocations([...foundLocations, currentLoc.id]);
+              setCodeInput('');
+              setWrongAttempt(false);
+              
+              if (currentLoc.id === 4) {
+                setGameState('victory');
+              } else {
+                setGameState('found');
+                setTimeout(() => {
+                  setCurrentLocation(currentLocation + 1);
+                  setGameState('hunting');
+                  setShowHint(false);
+                }, 3000);
+              }
+            } else {
+              setWrongAttempt(true);
+              setTimeout(() => setWrongAttempt(false), 2000);
+            }
+          };
+
+          const handleKeyPress = (e) => {
+            if (e.key === 'Enter') {
+              handleCodeSubmit();
+            }
+          };
+
+          if (gameState === 'intro') {
+            return React.createElement('div', {
+              style: {
+                minHeight: '100vh',
+                background: 'linear-gradient(to bottom, #581c87, #1e3a8a, #000000)',
+                color: 'white',
+                padding: '24px',
+                display: 'flex',
+                alignItems: 'center',
+                justifyContent: 'center'
+              }
+            },
+              React.createElement('div', { style: { maxWidth: '448px', textAlign: 'center' } },
+                React.createElement('div', { style: { fontSize: '60px', marginBottom: '16px' } }, '⚡'),
+                React.createElement('h1', { 
+                  style: { 
+                    fontSize: '36px', 
+                    fontWeight: 'bold', 
+                    marginBottom: '16px', 
+                    color: '#fbbf24' 
+                  } 
+                }, 'The Golden Snitch Hunt'),
+                React.createElement('p', { style: { fontSize: '20px', marginBottom: '24px' } }, 'A Magical Adventure at Hogwarts'),
+                React.createElement('div', { 
+                  style: { 
+                    background: 'rgba(0, 0, 0, 0.5)', 
+                    padding: '24px', 
+                    borderRadius: '8px', 
+                    marginBottom: '24px' 
+                  } 
+                },
+                  React.createElement('p', { style: { marginBottom: '16px' } }, 'Young wizard, you have been chosen to embark on a quest through Hogwarts School of Witchcraft and Wizardry.'),
+                  React.createElement('p', { style: { marginBottom: '16px' } }, 'Follow the clues from Harry Potter\'s first year to find three magical locations.'),
+                  React.createElement('p', { style: { marginBottom: '16px' } }, 'Then, catch the Golden Snitch to win the game!'),
+                  React.createElement('div', { 
+                    style: { 
+                      background: 'rgba(91, 33, 182, 0.5)', 
+                      padding: '16px', 
+                      borderRadius: '8px', 
+                      marginTop: '16px' 
+                    } 
+                  },
+                    React.createElement('p', { 
+                      style: { 
+                        color: '#fcd34d', 
+                        fontSize: '14px', 
+                        fontWeight: 'bold', 
+                        marginBottom: '8px' 
+                      } 
+                    }, '📱 How to Play:'),
+                    React.createElement('p', { style: { fontSize: '14px' } }, 'Each location has a magical code. When you find a location, look for the code and enter it to unlock the next clue!')
+                  )
+                ),
+                React.createElement('button', {
+                  onClick: startGame,
+                  style: {
+                    background: '#eab308',
+                    color: 'black',
+                    fontWeight: 'bold',
+                    padding: '12px 32px',
+                    borderRadius: '9999px',
+                    fontSize: '20px',
+                    border: 'none',
+                    transition: 'all 0.3s',
+                    cursor: 'pointer'
+                  }
+                }, 'Begin Your Quest')
+              )
+            );
+          }
+
+          if (gameState === 'hunting') {
+            const currentLoc = locations[currentLocation];
+            
+            return React.createElement('div', {
+              style: {
+                minHeight: '100vh',
+                background: 'linear-gradient(to bottom, #312e81, #581c87, #000000)',
+                color: 'white',
+                padding: '24px'
+              }
+            },
+              React.createElement('div', { style: { maxWidth: '448px', margin: '0 auto' } },
+                React.createElement('div', { style: { marginBottom: '24px' } },
+                  React.createElement('div', { 
+                    style: { 
+                      display: 'flex', 
+                      justifyContent: 'space-between', 
+                      alignItems: 'center', 
+                      marginBottom: '8px' 
+                    } 
+                  },
+                    React.createElement('span', { style: { fontSize: '14px' } }, 'Progress'),
+                    React.createElement('span', { style: { fontSize: '14px' } }, `${foundLocations.length} of 4`)
+                  ),
+                  React.createElement('div', { 
+                    style: { 
+                      width: '100%', 
+                      background: '#374151', 
+                      borderRadius: '9999px', 
+                      height: '8px' 
+                    } 
+                  },
+                    React.createElement('div', { 
+                      style: { 
+                        background: '#fbbf24', 
+                        height: '8px', 
+                        borderRadius: '9999px', 
+                        width: `${(foundLocations.length / 4) * 100}%`,
+                        transition: 'width 0.5s'
+                      } 
+                    })
+                  )
+                ),
+                React.createElement('div', { 
+                  style: { 
+                    background: 'rgba(0, 0, 0, 0.5)', 
+                    borderRadius: '8px', 
+                    padding: '24px', 
+                    marginBottom: '24px' 
+                  } 
+                },
+                  React.createElement('div', { 
+                    style: { 
+                      fontSize: '48px', 
+                      textAlign: 'center', 
+                      marginBottom: '12px' 
+                    } 
+                  }, currentLoc.icon),
+                  React.createElement('h2', { 
+                    style: { 
+                      fontSize: '24px', 
+                      fontWeight: 'bold', 
+                      color: '#fbbf24', 
+                      marginBottom: '16px', 
+                      textAlign: 'center' 
+                    } 
+                  }, `Find: ${currentLoc.name}`),
+                  React.createElement('div', { 
+                    style: { 
+                      background: 'rgba(91, 33, 182, 0.5)', 
+                      padding: '16px', 
+                      borderRadius: '8px', 
+                      marginBottom: '16px', 
+                      border: '1px solid #a855f7' 
+                    } 
+                  },
+                    React.createElement('p', { 
+                      style: { 
+                        fontStyle: 'italic', 
+                        fontSize: '14px', 
+                        lineHeight: '1.5' 
+                      } 
+                    }, currentLoc.clue)
+                  ),
+                  showHint && React.createElement('div', { 
+                    style: { 
+                      background: 'rgba(30, 58, 138, 0.5)', 
+                      padding: '16px', 
+                      borderRadius: '8px', 
+                      marginBottom: '16px', 
+                      border: '1px solid #3b82f6' 
+                    },
+                    className: 'animate-pulse'
+                  },
+                    React.createElement('p', { style: { fontSize: '14px' } }, `💡 ${currentLoc.hint}`)
+                  ),
+                  React.createElement('button', {
+                    onClick: () => setShowHint(!showHint),
+                    style: {
+                      width: '100%',
+                      background: '#2563eb',
+                      color: 'white',
+                      padding: '8px',
+                      borderRadius: '8px',
+                      border: 'none',
+                      fontSize: '14px',
+                      marginBottom: '16px',
+                      display: 'flex',
+                      alignItems: 'center',
+                      justifyContent: 'center',
+                      gap: '8px'
+                    }
+                  }, `${showHint ? 'Hide Hint' : 'Need a Hint?'}`),
+                  React.createElement('div', { 
+                    style: { 
+                      background: 'linear-gradient(to bottom, #78350f, #c2410c)', 
+                      padding: '16px', 
+                      borderRadius: '8px', 
+                      border: '2px solid #eab308' 
+                    } 
+                  },
+                    React.createElement('div', { 
+                      style: { 
+                        display: 'flex', 
+                        alignItems: 'center', 
+                        gap: '8px', 
+                        marginBottom: '12px' 
+                      } 
+                    },
+                      React.createElement('span', { style: { fontWeight: 'bold', color: '#fcd34d' } }, 'Enter Magical Code')
+                    ),
+                    React.createElement('div', { style: { display: 'flex', gap: '8px' } },
+                      React.createElement('input', {
+                        type: 'text',
+                        value: codeInput,
+                        onChange: (e) => setCodeInput(e.target.value),
+                        onKeyPress: handleKeyPress,
+                        placeholder: currentLoc.id === 4 ? 'Enter code...' : '3 characters',
+                        maxLength: 3,
+                        className: wrongAttempt ? 'animate-shake' : '',
+                        style: {
+                          flex: 1,
+                          background: 'rgba(0, 0, 0, 0.5)',
+                          color: 'white',
+                          textAlign: 'center',
+                          fontSize: '32px',
+                          fontWeight: 'bold',
+                          padding: '12px 16px',
+                          borderRadius: '8px',
+                          border: `2px solid ${wrongAttempt ? '#ef4444' : '#eab308'}`,
+                          textTransform: 'uppercase'
+                        }
+                      }),
+                      React.createElement('button', {
+                        onClick: handleCodeSubmit,
+                        disabled: codeInput.length === 0,
+                        style: {
+                          background: codeInput.length === 0 ? '#4b5563' : '#eab308',
+                          color: 'black',
+                          fontWeight: 'bold',
+                          padding: '0 24px',
+                          borderRadius: '8px',
+                          border: 'none',
+                          cursor: codeInput.length === 0 ? 'not-allowed' : 'pointer'
+                        }
+                      }, '🪄')
+                    ),
+                    wrongAttempt && React.createElement('p', { 
+                      style: { 
+                        color: '#fca5a5', 
+                        fontSize: '14px', 
+                        marginTop: '8px', 
+                        textAlign: 'center', 
+                        fontWeight: 'bold' 
+                      } 
+                    }, '❌ Wrong code! Keep searching...'),
+                    React.createElement('p', { 
+                      style: { 
+                        color: '#fef3c7', 
+                        fontSize: '12px', 
+                        marginTop: '8px', 
+                        textAlign: 'center' 
+                      } 
+                    }, currentLoc.id === 4 
+                      ? 'The code is hidden in plain sight...' 
+                      : 'Look for a device with code ending in 3 letters/numbers')
+                  )
+                ),
+                foundLocations.length > 0 && React.createElement('div', { 
+                  style: { 
+                    background: 'rgba(0, 0, 0, 0.5)', 
+                    borderRadius: '8px', 
+                    padding: '16px' 
+                  } 
+                },
+                  React.createElement('h3', { 
+                    style: { 
+                      fontSize: '14px', 
+                      fontWeight: 'bold', 
+                      marginBottom: '8px', 
+                      display: 'flex', 
+                      alignItems: 'center', 
+                      gap: '8px' 
+                    } 
+                  }, '⭐ Discovered Locations'),
+                  React.createElement('div', { style: { display: 'flex', gap: '8px' } },
+                    locations.slice(0, 3).map(loc => 
+                      React.createElement('div', {
+                        key: loc.id,
+                        style: {
+                          flex: 1,
+                          textAlign: 'center',
+                          padding: '8px',
+                          borderRadius: '4px',
+                          background: foundLocations.includes(loc.id) ? '#16a34a' : '#374151',
+                          color: foundLocations.includes(loc.id) ? 'white' : '#9ca3af'
+                        }
+                      },
+                        React.createElement('div', { style: { fontSize: '20px' } }, loc.icon)
+                      )
+                    )
+                  )
+                )
+              )
+            );
+          }
+
+          if (gameState === 'found') {
+            const foundLoc = locations[currentLocation];
+            
+            return React.createElement('div', {
+              style: {
+                minHeight: '100vh',
+                background: 'linear-gradient(to bottom, #065f46, #047857, #000000)',
+                color: 'white',
+                padding: '24px',
+                display: 'flex',
+                alignItems: 'center',
+                justifyContent: 'center'
+              }
+            },
+              React.createElement('div', { style: { maxWidth: '448px', textAlign: 'center' } },
+                React.createElement('div', { 
+                  style: { fontSize: '96px', marginBottom: '24px' },
+                  className: 'animate-bounce'
+                }, foundLoc.icon),
+                React.createElement('h2', { 
+                  style: { 
+                    fontSize: '30px', 
+                    fontWeight: 'bold', 
+                    color: '#fbbf24', 
+                    marginBottom: '16px' 
+                  } 
+                }, 'Location Found!'),
+                React.createElement('div', { 
+                  style: { 
+                    background: 'rgba(0, 0, 0, 0.5)', 
+                    padding: '24px', 
+                    borderRadius: '8px', 
+                    marginBottom: '24px' 
+                  } 
+                },
+                  React.createElement('p', { 
+                    style: { 
+                      fontSize: '20px', 
+                      marginBottom: '8px', 
+                      fontWeight: 'bold' 
+                    } 
+                  }, foundLoc.name),
+                  React.createElement('p', { style: { fontStyle: 'italic' } }, foundLoc.foundMessage)
+                ),
+                React.createElement('div', { 
+                  style: { 
+                    display: 'flex', 
+                    alignItems: 'center', 
+                    justifyContent: 'center', 
+                    gap: '8px', 
+                    color: '#fcd34d' 
+                  } 
+                },
+                  React.createElement('span', null, '⭐'),
+                  React.createElement('span', null, '+50 House Points'),
+                  React.createElement('span', null, '⭐')
+                )
+              )
+            );
+          }
+
+          if (gameState === 'victory') {
+            return React.createElement('div', {
+              style: {
+                minHeight: '100vh',
+                background: 'linear-gradient(to bottom, #ca8a04, #ea580c, #dc2626)',
+                color: 'white',
+                padding: '24px',
+                display: 'flex',
+                alignItems: 'center',
+                justifyContent: 'center'
+              }
+            },
+              React.createElement('div', { style: { maxWidth: '448px', textAlign: 'center' } },
+                React.createElement('div', { 
+                  style: { fontSize: '112px', marginBottom: '24px' },
+                  className: 'animate-bounce'
+                }, '⚡'),
+                React.createElement('h1', { 
+                  style: { 
+                    fontSize: '48px', 
+                    fontWeight: 'bold', 
+                    marginBottom: '16px' 
+                  } 
+                }, 'VICTORY!'),
+                React.createElement('div', { 
+                  style: { 
+                    background: 'rgba(0, 0, 0, 0.5)', 
+                    padding: '32px', 
+                    borderRadius: '8px', 
+                    marginBottom: '24px' 
+                  } 
+                },
+                  React.createElement('div', { 
+                    style: { 
+                      fontSize: '64px', 
+                      margin: '0 auto 16px',
+                      display: 'inline-block'
+                    } 
+                  }, '🏆'),
+                  React.createElement('p', { 
+                    style: { 
+                      fontSize: '24px', 
+                      marginBottom: '16px' 
+                    } 
+                  }, 'You caught the Golden Snitch!'),
+                  React.createElement('p', { 
+                    style: { 
+                      fontSize: '20px', 
+                      marginBottom: '16px' 
+                    } 
+                  }, '+150 Points!'),
+                  React.createElement('p', { style: { marginBottom: '16px' } }, 'You\'ve completed your journey through Hogwarts and proven yourself a true seeker!'),
+                  React.createElement('div', { 
+                    style: { 
+                      fontSize: '30px', 
+                      margin: '24px 0' 
+                    } 
+                  }, '🏆 ⚡ 🏆'),
+                  React.createElement('p', { 
+                    style: { 
+                      color: '#fcd34d', 
+                      fontStyle: 'italic' 
+                    } 
+                  }, '"It takes a great deal of bravery to stand up to our enemies, but just as much to stand up to our friends."'),
+                  React.createElement('p', { 
+                    style: { 
+                      fontSize: '14px', 
+                      marginTop: '8px' 
+                    } 
+                  }, '- Albus Dumbledore')
+                ),
+                React.createElement('button', {
+                  onClick: resetGame,
+                  style: {
+                    background: '#eab308',
+                    color: 'black',
+                    fontWeight: 'bold',
+                    padding: '12px 32px',
+                    borderRadius: '9999px',
+                    fontSize: '20px',
+                    border: 'none',
+                    cursor: 'pointer'
+                  }
+                }, 'Play Again')
+              )
+            );
+          }
+
+          return null;
+        };
+
+        const root = ReactDOM.createRoot(document.getElementById('root'));
+        root.render(React.createElement(GoldenSnitchHunt));
+    </script>
+</body>
+</html>
