@@ -357,118 +357,93 @@
                     }
                   }, `${showHint ? 'Hide Hint' : 'Need a Hint?'}`),
                   React.createElement('div', { 
-                    style: { 
-                      background: 'linear-gradient(to bottom, #78350f, #c2410c)', 
-                      padding: '16px', 
-                      borderRadius: '8px', 
-                      border: '2px solid #eab308' 
-                    } 
-                  },
-                    React.createElement('div', { 
-                      style: { 
-                        display: 'flex', 
-                        alignItems: 'center', 
-                        gap: '8px', 
-                        marginBottom: '12px' 
-                      } 
-                    },
-                      React.createElement('span', { style: { fontWeight: 'bold', color: '#fcd34d' } }, 'Enter Magical Code')
-                    ),
-                    React.createElement('div', { style: { display: 'flex', gap: '8px' } },
-                      React.createElement('input', {
-                        type: 'text',
-                        value: codeInput,
-                        onChange: (e) => setCodeInput(e.target.value),
-                        onKeyPress: handleKeyPress,
-                        placeholder: currentLoc.id === 4 ? 'Enter code...' : '3 characters',
-                        maxLength: 3,
-                        className: wrongAttempt ? 'animate-shake' : '',
-                        style: {
-                          flex: 1,
-                          background: 'rgba(0, 0, 0, 0.5)',
-                          color: 'white',
-                          textAlign: 'center',
-                          fontSize: '32px',
-                          fontWeight: 'bold',
-                          padding: '12px 16px',
-                          borderRadius: '8px',
-                          border: `2px solid ${wrongAttempt ? '#ef4444' : '#eab308'}`,
-                          textTransform: 'uppercase'
-                        }
-                      }),
-                      React.createElement('button', {
-                        onClick: handleCodeSubmit,
-                        disabled: codeInput.length === 0,
-                        style: {
-                          background: codeInput.length === 0 ? '#4b5563' : '#eab308',
-                          color: 'black',
-                          fontWeight: 'bold',
-                          padding: '0 24px',
-                          borderRadius: '8px',
-                          border: 'none',
-                          cursor: codeInput.length === 0 ? 'not-allowed' : 'pointer'
-                        }
-                      }, '🪄')
-                    ),
-                    wrongAttempt && React.createElement('p', { 
-                      style: { 
-                        color: '#fca5a5', 
-                        fontSize: '14px', 
-                        marginTop: '8px', 
-                        textAlign: 'center', 
-                        fontWeight: 'bold' 
-                      } 
-                    }, '❌ Wrong code! Keep searching...'),
-                    React.createElement('p', { 
-                      style: { 
-                        color: '#fef3c7', 
-                        fontSize: '12px', 
-                        marginTop: '8px', 
-                        textAlign: 'center' 
-                      } 
-                    }, currentLoc.id === 4 
-                      ? 'The code is hidden in plain sight...' 
-                      : 'Look for a device with code ending in 3 letters/numbers')
-                  )
-                ),
-                foundLocations.length > 0 && React.createElement('div', { 
-                  style: { 
-                    background: 'rgba(0, 0, 0, 0.5)', 
-                    borderRadius: '8px', 
-                    padding: '16px' 
-                  } 
-                },
-                  React.createElement('h3', { 
-                    style: { 
-                      fontSize: '14px', 
-                      fontWeight: 'bold', 
-                      marginBottom: '8px', 
-                      display: 'flex', 
-                      alignItems: 'center', 
-                      gap: '8px' 
-                    } 
-                  }, '⭐ Discovered Locations'),
-                  React.createElement('div', { style: { display: 'flex', gap: '8px' } },
-                    locations.slice(0, 3).map(loc => 
-                      React.createElement('div', {
-                        key: loc.id,
-                        style: {
-                          flex: 1,
-                          textAlign: 'center',
-                          padding: '8px',
-                          borderRadius: '4px',
-                          background: foundLocations.includes(loc.id) ? '#16a34a' : '#374151',
-                          color: foundLocations.includes(loc.id) ? 'white' : '#9ca3af'
-                        }
-                      },
-                        React.createElement('div', { style: { fontSize: '20px' } }, loc.icon)
-                      )
-                    )
-                  )
-                )
-              )
-            );
-          }
+  style: { 
+    background: 'linear-gradient(to bottom, #78350f, #c2410c)', 
+    padding: '16px', 
+    borderRadius: '8px', 
+    border: '2px solid #eab308',
+    display: 'flex',
+    flexDirection: 'column',
+    gap: '12px'
+  } 
+},
+  React.createElement('div', { 
+    style: { 
+      fontWeight: 'bold', 
+      color: '#fcd34d',
+      textAlign: 'center'
+    } 
+  }, 'Enter Magical Code'),
+  
+  // Input + button row - now wrapped in a container with max-width handling
+  React.createElement('div', { 
+    style: { 
+      display: 'flex', 
+      gap: '8px',
+      alignItems: 'center'
+    } 
+  },
+    React.createElement('input', {
+      type: 'text',
+      value: codeInput,
+      onChange: (e) => setCodeInput(e.target.value),
+      onKeyPress: handleKeyPress,
+      placeholder: currentLoc.id === 4 ? 'Enter code...' : '3 characters',
+      maxLength: 3,
+      className: wrongAttempt ? 'animate-shake' : '',
+      style: {
+        flex: 1,
+        minWidth: 0, // crucial: allows shrinking in flex
+        background: 'rgba(0, 0, 0, 0.5)',
+        color: 'white',
+        textAlign: 'center',
+        fontSize: '28px',         // reduced from 32px
+        fontWeight: 'bold',
+        padding: '12px 8px',      // reduced horizontal padding
+        borderRadius: '8px',
+        border: `2px solid ${wrongAttempt ? '#ef4444' : '#eab308'}`,
+        textTransform: 'uppercase',
+        boxSizing: 'border-box'
+      }
+    }),
+    React.createElement('button', {
+      onClick: handleCodeSubmit,
+      disabled: codeInput.length === 0,
+      style: {
+        background: codeInput.length === 0 ? '#4b5563' : '#eab308',
+        color: 'black',
+        fontWeight: 'bold',
+        padding: '12px 16px',     // smaller than before
+        borderRadius: '8px',
+        border: 'none',
+        cursor: codeInput.length === 0 ? 'not-allowed' : 'pointer',
+        flexShrink: 0
+      }
+    }, '🪄')
+  ),
+
+  wrongAttempt && React.createElement('p', { 
+    style: { 
+      color: '#fca5a5', 
+      fontSize: '14px', 
+      margin: 0,
+      textAlign: 'center', 
+      fontWeight: 'bold' 
+    } 
+  }, '❌ Wrong code! Keep searching...'),
+  
+  React.createElement('p', { 
+    style: { 
+      color: '#fef3c7', 
+      fontSize: '11px',         // much smaller guide text
+      margin: 0,
+      textAlign: 'center',
+      lineHeight: '1.4'
+    } 
+  }, currentLoc.id === 4 
+    ? 'The code is hidden in plain sight...' 
+    : 'Look for a device with code ending in 3 letters/numbers')
+)
 
           if (gameState === 'found') {
             const foundLoc = locations[currentLocation];
